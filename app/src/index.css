@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: dark; }
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-surface text-text font-sans antialiased;
+    background-image: theme('backgroundImage.app-radial');
+    background-attachment: fixed;
+  }
+  *:focus-visible {
+    outline: 2px solid #0C5CAB;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #26262d; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a45; }
+}
+
+@layer components {
+  .panel {
+    @apply bg-surface-panel/80 border border-surface-border rounded-xl shadow-panel backdrop-blur;
+    background-image: theme('backgroundImage.panel-gradient');
+  }
+  .panel-raised {
+    @apply bg-surface-raised border border-surface-border rounded-xl shadow-panel;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3 h-9 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed select-none;
+  }
+  .btn-primary { @apply btn bg-primary hover:bg-primary-hover text-white; }
+  .btn-secondary { @apply btn bg-surface-raised border border-surface-border hover:bg-surface-hover text-text; }
+  .btn-ghost { @apply btn hover:bg-surface-hover text-text-muted hover:text-text; }
+  .btn-danger { @apply btn bg-danger/90 hover:bg-danger text-white; }
+  .btn-sm { @apply h-7 px-2 text-xs; }
+  .input {
+    @apply w-full h-9 px-3 rounded-md bg-surface-raised border border-surface-border text-sm text-text placeholder:text-text-dim focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 h-5 rounded-full text-[11px] font-medium border;
+  }
+  .badge-neutral { @apply badge bg-surface-raised border-surface-border text-text-muted; }
+  .badge-primary { @apply badge bg-primary/15 border-primary/40 text-primary; }
+  .badge-success { @apply badge bg-success/15 border-success/40 text-success; }
+  .badge-warning { @apply badge bg-warning/15 border-warning/40 text-warning; }
+  .badge-danger  { @apply badge bg-danger/15  border-danger/40  text-danger; }
+  .label { @apply text-xs font-medium text-text-muted uppercase tracking-wider; }
+  .divider { @apply h-px bg-surface-border; }
+}
