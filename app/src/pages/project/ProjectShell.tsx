@@ -38,12 +38,12 @@ export function ProjectShell() {
     );
   }
 
-  const tabs: { to: string; label: string; icon: typeof Settings; gated?: boolean }[] = [
+  const tabs: { to: string; label: string; icon: typeof Settings }[] = [
     { to: 'retros', label: 'Retros', icon: KanbanSquare },
     { to: 'history', label: 'History', icon: Clock },
     { to: 'action-items', label: 'Action Items', icon: ListChecks },
     { to: 'reports', label: 'Reports', icon: FileText },
-    { to: 'settings', label: 'Settings', icon: Settings, gated: !can(role, 'manage_members') },
+    ...(can(role, 'manage_members') ? [{ to: 'settings', label: 'Settings', icon: Settings }] : []),
   ];
 
   const onDownload = async () => {
@@ -66,15 +66,25 @@ export function ProjectShell() {
           {project.description && <p className="text-sm text-text-muted max-w-2xl">{project.description}</p>}
         </div>
         <Tooltip label={can(role, 'download_project') ? undefined : 'Admin only'}>
-          <button onClick={onDownload} disabled={!can(role, 'download_project')} className="btn-secondary">
-            <Download size={14} /> Download Project
+          <button
+            onClick={() => {
+              if (!can(role, 'download_project')) {
+                pushToast({ kind: 'info', message: 'Admin only' });
+                return;
+              }
+              onDownload();
+            }}
+            aria-disabled={!can(role, 'download_project')}
+            className="btn-secondary"
+          >
+            <Download size={14} aria-hidden="true" /> Download Project
           </button>
         </Tooltip>
       </div>
 
-      <nav className="border-b border-surface-border mb-6 -mx-1">
+      <nav aria-label="Project sections" className="border-b border-surface-border mb-6 -mx-1">
         <div className="flex gap-1 overflow-x-auto">
-          {tabs.map(({ to, label, icon: Icon, gated }) => (
+          {tabs.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -83,11 +93,11 @@ export function ProjectShell() {
                   isActive
                     ? 'border-primary text-text'
                     : 'border-transparent text-text-muted hover:text-text'
-                } ${gated ? 'opacity-50 pointer-events-none' : ''}`
+                }`
               }
               end={to === 'retros' ? false : true}
             >
-              <Icon size={14} />
+              <Icon size={14} aria-hidden="true" />
               {label}
             </NavLink>
           ))}

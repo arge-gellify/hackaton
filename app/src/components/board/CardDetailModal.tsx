@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Tooltip } from '../ui/Tooltip';
@@ -34,6 +34,9 @@ export function CardDetailModal({ open, onClose, card, retroId, projectId, readO
 
   const [text, setText] = useState(card.text);
   const [newAi, setNewAi] = useState('');
+  const textId = useId();
+  const textHelpId = useId();
+  const newAiId = useId();
 
   const isOwn = card.authorId === me;
   const canEditText = !readOnly && (can(role, 'edit_any') || (isOwn && can(role, 'edit_own')));
@@ -67,79 +70,99 @@ export function CardDetailModal({ open, onClose, card, retroId, projectId, readO
     >
       <div className="flex flex-col gap-5">
         <div>
-          <label className="label block mb-1.5">Card text</label>
+          <label htmlFor={textId} className="label block mb-1.5">Card text</label>
           <textarea
+            id={textId}
             disabled={!canEditText}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onBlur={save}
             className="input h-24 py-2"
+            aria-describedby={!canEditText ? textHelpId : undefined}
           />
-          {!canEditText && <p className="text-xs text-text-dim mt-1.5">Read-only — owner or Scrum Master can edit.</p>}
+          {!canEditText && (
+            <p id={textHelpId} className="text-xs text-text-dim mt-1.5">
+              Read-only — owner or Scrum Master can edit.
+            </p>
+          )}
         </div>
 
-        <div>
+        <section aria-labelledby={`${textId}-ai-heading`}>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="label">Action items ({card.actionItems.length})</h3>
+            <h3 id={`${textId}-ai-heading`} className="label">Action items ({card.actionItems.length})</h3>
           </div>
 
-          <div className="flex flex-col gap-2">
-            {card.actionItems.map((ai) => {
-              const isOwnItem = false; // action items don't track author beyond card; treat Member+ as owner-like for own card
-              const canEdit = !readOnly && (can(role, 'edit_any') || (isOwn && can(role, 'edit_own')) || isOwnItem);
-              return (
-                <div key={ai.id} className="panel-raised p-3 flex flex-col gap-2">
-                  <input
-                    disabled={!canEdit}
-                    className="input"
-                    value={ai.title}
-                    onChange={(e) => updateActionItem(retroId, card.id, ai.id, { title: e.target.value })}
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <select
-                      disabled={!canEdit}
-                      className="input"
-                      value={ai.assigneeId ?? ''}
-                      onChange={(e) => updateActionItem(retroId, card.id, ai.id, { assigneeId: e.target.value || undefined })}
-                    >
-                      <option value="">Unassigned</option>
-                      {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                    </select>
+          {card.actionItems.length === 0 ? (
+            <p className="text-xs text-text-dim italic">No action items yet.</p>
+          ) : (
+            <ul className="flex flex-col gap-2 list-none p-0">
+              {card.actionItems.map((ai) => {
+                const isOwnItem = false; // action items don't track author beyond card; treat Member+ as owner-like for own card
+                const canEdit = !readOnly && (can(role, 'edit_any') || (isOwn && can(role, 'edit_own')) || isOwnItem);
+                return (
+                  <li key={ai.id} className="panel-raised p-3 flex flex-col gap-2">
                     <input
                       disabled={!canEdit}
-                      type="date"
                       className="input"
-                      value={ai.dueDate ? ai.dueDate.slice(0, 10) : ''}
-                      onChange={(e) => updateActionItem(retroId, card.id, ai.id, { dueDate: e.target.value || undefined })}
+                      value={ai.title}
+                      onChange={(e) => updateActionItem(retroId, card.id, ai.id, { title: e.target.value })}
+                      aria-label="Action item title"
                     />
-                    <select
-                      disabled={!canEdit}
-                      className="input"
-                      value={ai.status}
-                      onChange={(e) => updateActionItem(retroId, card.id, ai.id, { status: e.target.value as ActionItemStatus })}
-                    >
-                      {STATUS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-text-dim">
-                    <span>Created {fmtDate(ai.createdAt)}</span>
-                    {canEdit && (
-                      <button onClick={() => deleteActionItem(retroId, card.id, ai.id)} className="text-danger hover:underline inline-flex items-center gap-1">
-                        <Trash2 size={12} /> Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <select
+                        disabled={!canEdit}
+                        className="input"
+                        value={ai.assigneeId ?? ''}
+                        onChange={(e) => updateActionItem(retroId, card.id, ai.id, { assigneeId: e.target.value || undefined })}
+                        aria-label="Assignee"
+                      >
+                        <option value="">Unassigned</option>
+                        {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                      </select>
+                      <input
+                        disabled={!canEdit}
+                        type="date"
+                        className="input"
+                        value={ai.dueDate ? ai.dueDate.slice(0, 10) : ''}
+                        onChange={(e) => updateActionItem(retroId, card.id, ai.id, { dueDate: e.target.value || undefined })}
+                        aria-label="Due date"
+                      />
+                      <select
+                        disabled={!canEdit}
+                        className="input"
+                        value={ai.status}
+                        onChange={(e) => updateActionItem(retroId, card.id, ai.id, { status: e.target.value as ActionItemStatus })}
+                        aria-label="Status"
+                      >
+                        {STATUS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-text-dim">
+                      <span>Created {fmtDate(ai.createdAt)}</span>
+                      {canEdit && (
+                        <button
+                          onClick={() => deleteActionItem(retroId, card.id, ai.id)}
+                          className="text-danger hover:underline inline-flex items-center gap-1"
+                          aria-label={`Delete action item: ${ai.title}`}
+                        >
+                          <Trash2 size={12} aria-hidden="true" /> Delete
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
           {canAddAi && (
             <form
               onSubmit={(e) => { e.preventDefault(); if (newAi.trim()) { addActionItem(retroId, card.id, newAi.trim()); setNewAi(''); } }}
               className="mt-3 flex gap-2"
             >
+              <label htmlFor={newAiId} className="sr-only">New action item</label>
               <input
+                id={newAiId}
                 value={newAi}
                 onChange={(e) => setNewAi(e.target.value)}
                 placeholder="New action item…"
@@ -147,12 +170,12 @@ export function CardDetailModal({ open, onClose, card, retroId, projectId, readO
               />
               <Tooltip label={canAddAi ? undefined : 'Member+ only'}>
                 <button type="submit" className="btn-primary" disabled={!newAi.trim()}>
-                  <Plus size={14} /> Add
+                  <Plus size={14} aria-hidden="true" /> Add
                 </button>
               </Tooltip>
             </form>
           )}
-        </div>
+        </section>
       </div>
     </Modal>
   );

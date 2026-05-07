@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Download, CheckCircle2, Edit3, Lock } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
@@ -22,6 +22,7 @@ export function ReportPage() {
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(report?.summary ?? '');
+  const summaryId = useId();
 
   if (!report || !retro) {
     return <p className="text-text-muted">Report not found.</p>;
@@ -58,11 +59,18 @@ export function ReportPage() {
         <div className="flex items-center gap-2">
           <Tooltip label={canFinal ? undefined : 'Scrum Master / Admin only'}>
             <button
-              onClick={() => { setReportFinal(report.id, !report.isFinal); pushToast({ kind: 'info', message: report.isFinal ? 'Unmarked Final' : 'Marked Final' }); }}
-              disabled={!canFinal}
+              onClick={() => {
+                if (!canFinal) {
+                  pushToast({ kind: 'info', message: 'Scrum Master / Admin only' });
+                  return;
+                }
+                setReportFinal(report.id, !report.isFinal);
+                pushToast({ kind: 'info', message: report.isFinal ? 'Unmarked Final' : 'Marked Final' });
+              }}
+              aria-disabled={!canFinal}
               className="btn-secondary"
             >
-              <CheckCircle2 size={14} /> {report.isFinal ? 'Unmark Final' : 'Mark Final'}
+              <CheckCircle2 size={14} aria-hidden="true" /> {report.isFinal ? 'Unmark Final' : 'Mark Final'}
             </button>
           </Tooltip>
           <button onClick={onDownload} className="btn-primary">
@@ -123,7 +131,9 @@ export function ReportPage() {
         </div>
         {editing ? (
           <div className="flex flex-col gap-2">
+            <label htmlFor={summaryId} className="sr-only">Report summary (markdown)</label>
             <textarea
+              id={summaryId}
               className="input h-48 py-2 font-mono text-xs"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}

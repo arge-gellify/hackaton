@@ -10,8 +10,10 @@ import { useAppStore } from '../../stores/useAppStore';
 import { getTemplate } from '../../domain/templates';
 import { Column } from '../../components/board/Column';
 import { Tooltip } from '../../components/ui/Tooltip';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { can } from '../../domain/permissions';
 import { fmtDate } from '../../lib/format';
+import { announce } from '../../lib/announce';
 
 export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolean } = {}) {
   const { projectId, retroId } = useParams<{ projectId: string; retroId: string }>();
@@ -26,6 +28,7 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
   const [q, setQ] = useState('');
   const [colFilter, setColFilter] = useState<'all' | string>('all');
   const [minVotes, setMinVotes] = useState(0);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -74,12 +77,18 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
       if (toIndex < 0) toIndex = list.length;
     }
     moveCard(retro.id, cardId, toCol, toIndex);
+    const movedCard = retro.cards.find((c) => c.id === cardId);
+    const colTitle = tpl.columns.find((c) => c.key === toCol)?.title ?? toCol;
+    if (movedCard) {
+      announce('polite', `Moved card "${movedCard.text}" to ${colTitle}, position ${toIndex + 1}.`);
+    }
   };
 
   const handleClose = () => {
-    if (!confirm('Close this retro? It will become read-only and a draft report will be generated.')) return;
     closeRetro(retro.id);
     pushToast({ kind: 'success', message: 'Retro closed. Report generated.' });
+    announce('assertive', 'Retro closed. Report generated.');
+    setConfirmClose(false);
   };
 
   const remaining = retro.voteBudgetPerUser - votesUsed;
@@ -97,7 +106,7 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
             <span className={retro.status === 'active' ? 'badge-success' : 'badge-neutral'}>
               {retro.status === 'active' ? 'Active' : 'Closed'}
             </span>
-            {readOnly && <span className="badge-warning"><Lock size={10} /> Read-only</span>}
+            {readOnly && <span className="badge-warning"><Lock size={10} aria-hidden="true" /> Read-only</span>}
           </div>
           <p className="text-xs text-text-muted">
             {tpl.name} • Created {fmtDate(retro.createdAt)} {retro.closedAt && `• Closed ${fmtDate(retro.closedAt)}`}
@@ -112,8 +121,18 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
           </div>
           {retro.status === 'active' && (
             <Tooltip label={can(role, 'close_retro') ? undefined : 'Scrum Master / Admin only'}>
-              <button onClick={handleClose} disabled={!can(role, 'close_retro')} className="btn-primary">
-                <CheckCircle2 size={14} /> Close Retro
+              <button
+                onClick={() => {
+                  if (!can(role, 'close_retro')) {
+                    pushToast({ kind: 'info', message: 'Scrum Master / Admin only' });
+                    return;
+                  }
+                  setConfirmClose(true);
+                }}
+                aria-disabled={!can(role, 'close_retro')}
+                className="btn-primary"
+              >
+                <CheckCircle2 size={14} aria-hidden="true" /> Close Retro
               </button>
             </Tooltip>
           )}
@@ -122,16 +141,34 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
 
       <div className="panel p-3 mb-4 flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[180px]">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
-          <input className="input pl-9" placeholder="Search cards…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" aria-hidden="true" />
+          <input
+            className="input pl-9"
+            placeholder="Search cards…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            aria-label="Search cards"
+          />
         </div>
-        <select className="input w-auto" value={colFilter} onChange={(e) => setColFilter(e.target.value)}>
+        <select
+          className="input w-auto"
+          value={colFilter}
+          onChange={(e) => setColFilter(e.target.value)}
+          aria-label="Filter by column"
+        >
           <option value="all">All columns</option>
           {tpl.columns.map((c) => <option key={c.key} value={c.key}>{c.title}</option>)}
         </select>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">Min votes</span>
-          <input type="number" min={0} className="input w-20" value={minVotes} onChange={(e) => setMinVotes(Number(e.target.value))} />
+          <span className="text-xs text-text-muted" aria-hidden="true">Min votes</span>
+          <input
+            type="number"
+            min={0}
+            className="input w-20"
+            value={minVotes}
+            onChange={(e) => setMinVotes(Number(e.target.value))}
+            aria-label="Minimum votes"
+          />
         </div>
       </div>
 
@@ -152,6 +189,16 @@ export function RetroBoardPage({ readOnlyOverride }: { readOnlyOverride?: boolea
           ))}
         </div>
       </DndContext>
+
+      <ConfirmDialog
+        open={confirmClose}
+        title="Close this retro?"
+        message="It will become read-only and a draft report will be generated. You can still update action items afterwards."
+        confirmLabel="Close retro"
+        cancelLabel="Cancel"
+        onConfirm={handleClose}
+        onCancel={() => setConfirmClose(false)}
+      />
     </div>
   );
 }

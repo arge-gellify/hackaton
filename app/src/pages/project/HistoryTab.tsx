@@ -29,15 +29,20 @@ export function HistoryTab() {
   return (
     <div>
       <div className="panel p-3 mb-4 flex flex-wrap items-center gap-2">
-        <select className="input w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | RetroStatus)}>
+        <select
+          className="input w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | RetroStatus)}
+          aria-label="Filter timeline by status"
+        >
           <option value="all">All statuses</option>
           <option value="active">Active</option>
           <option value="closed">Closed</option>
         </select>
-        <span className="text-xs text-text-muted">From</span>
-        <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <span className="text-xs text-text-muted">To</span>
-        <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} />
+        <span className="text-xs text-text-muted" aria-hidden="true">From</span>
+        <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" />
+        <span className="text-xs text-text-muted" aria-hidden="true">To</span>
+        <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" />
       </div>
 
       {visible.length === 0 ? (
@@ -53,7 +58,7 @@ export function HistoryTab() {
             const report = reports.find((rep) => rep.retroId === r.id);
             return (
               <li key={r.id} className="relative">
-                <span className={`absolute -left-[33px] top-2 inline-flex w-4 h-4 rounded-full border-2 border-surface ${r.status === 'active' ? 'bg-success' : 'bg-text-dim'}`} />
+                <span aria-hidden="true" className={`absolute -left-[33px] top-2 inline-flex w-4 h-4 rounded-full border-2 border-surface ${r.status === 'active' ? 'bg-success' : 'bg-text-dim'}`} />
                 <div className="panel p-4 hover:border-primary/40 transition-colors">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <Link to={`/projects/${projectId}/retros/${r.id}`} className="font-semibold hover:text-primary">{r.title}</Link>

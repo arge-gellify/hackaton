@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, KanbanSquare } from 'lucide-react';
 import { useAppStore } from '../../stores/useAppStore';
@@ -31,6 +31,11 @@ export function RetrosTab() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
 
+  const titleId = useId();
+  const tplId = useId();
+  const voteId = useId();
+  const voteHelpId = useId();
+
   const visible = useMemo(() => {
     return retros
       .filter((r) => statusFilter === 'all' || r.status === statusFilter)
@@ -53,25 +58,45 @@ export function RetrosTab() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 panel p-3 mb-4">
-        <select className="input w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | RetroStatus)}>
+        <select
+          className="input w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | RetroStatus)}
+          aria-label="Filter retros by status"
+        >
           <option value="all">All statuses</option>
           <option value="active">Active</option>
           <option value="closed">Closed</option>
         </select>
-        <select className="input w-auto" value={tplFilter} onChange={(e) => setTplFilter(e.target.value)}>
+        <select
+          className="input w-auto"
+          value={tplFilter}
+          onChange={(e) => setTplFilter(e.target.value)}
+          aria-label="Filter retros by template"
+        >
           <option value="all">All templates</option>
           {TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">From</span>
-          <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span className="text-xs text-text-muted">To</span>
-          <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} />
+          <span className="text-xs text-text-muted" aria-hidden="true">From</span>
+          <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" />
+          <span className="text-xs text-text-muted" aria-hidden="true">To</span>
+          <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" />
         </div>
         <div className="flex-1" />
         <Tooltip label={can(role, 'create_retro') ? undefined : 'Scrum Master / Admin only'}>
-          <button onClick={() => setOpen(true)} disabled={!can(role, 'create_retro')} className="btn-primary">
-            <Plus size={16} /> New Retro
+          <button
+            onClick={() => {
+              if (!can(role, 'create_retro')) {
+                pushToast({ kind: 'info', message: 'Scrum Master / Admin only' });
+                return;
+              }
+              setOpen(true);
+            }}
+            aria-disabled={!can(role, 'create_retro')}
+            className="btn-primary"
+          >
+            <Plus size={16} aria-hidden="true" /> New Retro
           </button>
         </Tooltip>
       </div>
@@ -92,7 +117,7 @@ export function RetrosTab() {
                 onClick={() => navigate(`/projects/${projectId}/retros/${r.id}`)}
                 className="panel p-4 text-left hover:border-primary/40 flex items-center gap-4"
               >
-                <div className={`h-10 w-1 rounded-full ${r.status === 'active' ? 'bg-success' : 'bg-text-dim'}`} />
+                <div aria-hidden="true" className={`h-10 w-1 rounded-full ${r.status === 'active' ? 'bg-success' : 'bg-text-dim'}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold truncate">{r.title}</h3>
@@ -126,18 +151,39 @@ export function RetrosTab() {
       >
         <form id="new-retro" onSubmit={submit} className="flex flex-col gap-4">
           <div>
-            <label className="label block mb-1.5">Title</label>
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus placeholder="e.g. Sprint 25 Retro" />
+            <label htmlFor={titleId} className="label block mb-1.5">Title</label>
+            <input
+              id={titleId}
+              className="input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              aria-required="true"
+              autoFocus
+              placeholder="e.g. Sprint 25 Retro"
+            />
           </div>
           <div>
-            <label className="label block mb-1.5">Template</label>
-            <select className="input" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
+            <label htmlFor={tplId} className="label block mb-1.5">Template</label>
+            <select id={tplId} className="input" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
               {TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="label block mb-1.5">Vote budget per user</label>
-            <input type="number" min={1} max={20} className="input" value={voteBudget} onChange={(e) => setVoteBudget(Number(e.target.value))} />
+            <label htmlFor={voteId} className="label block mb-1.5">Vote budget per user</label>
+            <input
+              id={voteId}
+              type="number"
+              min={1}
+              max={20}
+              className="input"
+              value={voteBudget}
+              onChange={(e) => setVoteBudget(Number(e.target.value))}
+              aria-describedby={voteHelpId}
+            />
+            <p id={voteHelpId} className="text-xs text-text-muted mt-1.5">
+              Each member gets this many votes to spend across all cards. Default is 3.
+            </p>
           </div>
         </form>
       </Modal>

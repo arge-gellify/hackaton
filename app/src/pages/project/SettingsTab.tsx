@@ -41,11 +41,12 @@ export function SettingsTab() {
           </button>
         </div>
         <table className="w-full text-sm">
+          <caption className="sr-only">Project members and their roles</caption>
           <thead className="text-xs uppercase tracking-wider text-text-muted">
             <tr>
-              <th className="text-left px-4 py-2 font-medium">User</th>
-              <th className="text-left px-4 py-2 font-medium">Role</th>
-              <th className="px-4 py-2 w-16"></th>
+              <th scope="col" className="text-left px-4 py-2 font-medium">User</th>
+              <th scope="col" className="text-left px-4 py-2 font-medium">Role</th>
+              <th scope="col" className="px-4 py-2 w-16"><span className="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -65,6 +66,7 @@ export function SettingsTab() {
                       className="input w-44 h-8 text-xs"
                       value={m.role}
                       onChange={(e) => changeMemberRole(project.id, m.userId, e.target.value as Role)}
+                      aria-label={`Role for ${u.name}`}
                     >
                       {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
                     </select>
@@ -73,7 +75,7 @@ export function SettingsTab() {
                     <button
                       onClick={() => { removeMember(project.id, m.userId); pushToast({ kind: 'info', message: `${u.name} removed` }); }}
                       className="btn-ghost btn-sm text-danger hover:bg-danger/10"
-                      aria-label="Remove member"
+                      aria-label={`Remove ${u.name}`}
                     >
                       <Trash2 size={12} />
                     </button>
@@ -107,7 +109,12 @@ export function SettingsTab() {
               <div key={u.id} className="panel-raised p-3 flex items-center gap-3">
                 <Avatar name={u.name} color={u.avatarColor} size={28} />
                 <span className="flex-1 text-sm">{u.name}</span>
-                <select id={`role-${u.id}`} className="input w-40 h-8 text-xs" defaultValue="member">
+                <select
+                  id={`role-${u.id}`}
+                  className="input w-40 h-8 text-xs"
+                  defaultValue="member"
+                  aria-label={`Role for ${u.name}`}
+                >
                   {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
                 </select>
                 <button
@@ -117,6 +124,7 @@ export function SettingsTab() {
                     pushToast({ kind: 'success', message: `${u.name} added` });
                   }}
                   className="btn-primary btn-sm"
+                  aria-label={`Add ${u.name}`}
                 >
                   Add
                 </button>

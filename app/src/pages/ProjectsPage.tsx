@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Folder, Plus, Search, Users } from 'lucide-react';
 import { useAppStore } from '../stores/useAppStore';
@@ -27,6 +27,9 @@ export function ProjectsPage() {
   const [openNew, setOpenNew] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const nameId = useId();
+  const descId = useId();
+  const helpId = useId();
 
   const visible = useMemo(() => {
     return projects
@@ -61,11 +64,12 @@ export function ProjectsPage() {
 
       <div className="panel p-3 mb-5 flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[220px]">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" aria-hidden="true" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Filter by project name…"
+            aria-label="Filter projects by name"
             className="input pl-9"
           />
         </div>
@@ -73,6 +77,7 @@ export function ProjectsPage() {
           className="input w-auto"
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value as 'all' | Role)}
+          aria-label="Filter projects by my role"
         >
           <option value="all">All my roles</option>
           <option value="admin">Admin</option>
@@ -136,21 +141,30 @@ export function ProjectsPage() {
           </>
         }
       >
-        <form id="new-project" onSubmit={handleCreate} className="flex flex-col gap-4">
+        <form id="new-project" onSubmit={handleCreate} aria-describedby={helpId} className="flex flex-col gap-4">
           <div>
-            <label className="label block mb-1.5">Name</label>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
+            <label htmlFor={nameId} className="label block mb-1.5">Name</label>
+            <input
+              id={nameId}
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              aria-required="true"
+              autoFocus
+            />
           </div>
           <div>
-            <label className="label block mb-1.5">Description (optional)</label>
+            <label htmlFor={descId} className="label block mb-1.5">Description (optional)</label>
             <textarea
+              id={descId}
               className="input h-24 py-2"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What's this project for?"
             />
           </div>
-          <p className="text-xs text-text-muted">You'll be the Admin and the only member to start.</p>
+          <p id={helpId} className="text-xs text-text-muted">You'll be the Admin and the only member to start.</p>
         </form>
       </Modal>
     </div>

@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 
 interface Props {
   open: boolean;
@@ -11,6 +12,9 @@ interface Props {
 }
 
 export function Modal({ open, onClose, title, children, footer, size = 'md' }: Props) {
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -18,15 +22,24 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
+  useFocusTrap(open, panelRef);
+
   if (!open) return null;
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl' };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative panel-raised w-full ${widths[size]} max-h-[90vh] flex flex-col`}>
+      <div className="absolute inset-0 bg-overlay/70 backdrop-blur-sm" aria-hidden="true" onClick={onClose} />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={`relative panel-raised w-full ${widths[size]} max-h-[90vh] flex flex-col`}
+      >
         <header className="flex items-center justify-between px-5 py-4 border-b border-surface-border">
-          <h2 className="text-base font-semibold text-text">{title}</h2>
-          <button onClick={onClose} className="btn-ghost h-8 w-8 px-0" aria-label="Close">
+          <h2 id={titleId} className="text-base font-semibold text-text">{title}</h2>
+          <button onClick={onClose} className="btn-ghost h-8 w-8 px-0" aria-label="Close dialog">
             <X size={16} />
           </button>
         </header>

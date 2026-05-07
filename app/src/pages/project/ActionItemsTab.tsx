@@ -48,24 +48,44 @@ export function ActionItemsTab() {
   return (
     <div>
       <div className="panel p-3 mb-4 flex flex-wrap items-center gap-2">
-        <select className="input w-auto" value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+        <select
+          className="input w-auto"
+          value={assignee}
+          onChange={(e) => setAssignee(e.target.value)}
+          aria-label="Filter action items by assignee"
+        >
           <option value="all">All assignees</option>
           <option value="unassigned">Unassigned</option>
           {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
         </select>
-        <select className="input w-auto" value={status} onChange={(e) => setStatus(e.target.value as 'all' | ActionItemStatus)}>
+        <select
+          className="input w-auto"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as 'all' | ActionItemStatus)}
+          aria-label="Filter action items by status"
+        >
           <option value="all">All statuses</option>
           <option value="open">Open</option>
           <option value="in_progress">In Progress</option>
           <option value="done">Done</option>
         </select>
-        <select className="input w-auto" value={retroId} onChange={(e) => setRetroId(e.target.value)}>
+        <select
+          className="input w-auto"
+          value={retroId}
+          onChange={(e) => setRetroId(e.target.value)}
+          aria-label="Filter action items by source retro"
+        >
           <option value="all">All source retros</option>
           {retros.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
         </select>
         <div className="flex-1" />
-        <span className="text-xs text-text-muted">Sort by</span>
-        <select className="input w-auto" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'due' | 'status')}>
+        <span className="text-xs text-text-muted" aria-hidden="true">Sort by</span>
+        <select
+          className="input w-auto"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'due' | 'status')}
+          aria-label="Sort action items"
+        >
           <option value="due">Due date</option>
           <option value="status">Status</option>
         </select>
@@ -79,13 +99,14 @@ export function ActionItemsTab() {
       ) : (
         <div className="panel overflow-hidden">
           <table className="w-full text-sm">
+            <caption className="sr-only">Action items across all retros in this project</caption>
             <thead className="bg-surface-raised text-text-muted text-xs uppercase tracking-wider">
               <tr>
-                <th className="text-left px-4 py-2 font-medium">Title</th>
-                <th className="text-left px-4 py-2 font-medium">Assignee</th>
-                <th className="text-left px-4 py-2 font-medium">Due</th>
-                <th className="text-left px-4 py-2 font-medium">Status</th>
-                <th className="text-left px-4 py-2 font-medium">Source</th>
+                <th scope="col" className="text-left px-4 py-2 font-medium">Title</th>
+                <th scope="col" className="text-left px-4 py-2 font-medium">Assignee</th>
+                <th scope="col" className="text-left px-4 py-2 font-medium">Due</th>
+                <th scope="col" className="text-left px-4 py-2 font-medium">Status</th>
+                <th scope="col" className="text-left px-4 py-2 font-medium">Source</th>
               </tr>
             </thead>
             <tbody>
@@ -103,6 +124,7 @@ export function ActionItemsTab() {
                           className={`input h-7 w-32 text-xs`}
                           value={ai.status}
                           onChange={(e) => updateActionItem(retro.id, cardId, ai.id, { status: e.target.value as ActionItemStatus })}
+                          aria-label={`Status for ${ai.title}`}
                         >
                           <option value="open">Open</option>
                           <option value="in_progress">In Progress</option>

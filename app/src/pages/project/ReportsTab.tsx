@@ -30,15 +30,20 @@ export function ReportsTab() {
   return (
     <div>
       <div className="panel p-3 mb-4 flex flex-wrap items-center gap-2">
-        <select className="input w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'final')}>
+        <select
+          className="input w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'final')}
+          aria-label="Filter reports by status"
+        >
           <option value="all">All statuses</option>
           <option value="draft">Draft</option>
           <option value="final">Final</option>
         </select>
-        <span className="text-xs text-text-muted">From</span>
-        <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <span className="text-xs text-text-muted">To</span>
-        <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} />
+        <span className="text-xs text-text-muted" aria-hidden="true">From</span>
+        <input type="date" className="input w-auto" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" />
+        <span className="text-xs text-text-muted" aria-hidden="true">To</span>
+        <input type="date" className="input w-auto" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" />
       </div>
 
       {visible.length === 0 ? (

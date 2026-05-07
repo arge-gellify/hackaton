@@ -5,34 +5,92 @@
 @tailwind utilities;
 
 @layer base {
-  :root { color-scheme: dark; }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-primary: 12 92 171;
+    --color-primary-hover: 13 104 189;
+    --color-secondary: 10 74 138;
+    --color-success: 16 185 129;
+    --color-warning: 245 158 11;
+    --color-danger: 239 68 68;
+    --color-surface: 9 9 11;
+    --color-surface-raised: 17 17 20;
+    --color-surface-panel: 21 21 26;
+    --color-surface-border: 38 38 45;
+    --color-surface-hover: 28 28 34;
+    --color-text: 250 250 250;
+    --color-text-muted: 196 196 204;
+    --color-text-dim: 161 161 170;
+    --color-overlay: 0 0 0;
+    --shadow-panel: 0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -12px rgba(0,0,0,0.6);
+    --shadow-glow: 0 0 0 1px rgba(12,92,171,0.4), 0 8px 24px -8px rgba(12,92,171,0.4);
+    --bg-panel-gradient: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+    --bg-app-radial: radial-gradient(1200px 600px at 0% 0%, rgba(12,92,171,0.10), transparent 60%), radial-gradient(900px 500px at 100% 100%, rgba(12,92,171,0.06), transparent 60%);
+    --scrollbar-thumb: #26262d;
+    --scrollbar-thumb-hover: #3a3a45;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --color-primary: 12 92 171;
+    --color-primary-hover: 13 104 189;
+    --color-secondary: 10 74 138;
+    --color-success: 16 185 129;
+    --color-warning: 245 158 11;
+    --color-danger: 239 68 68;
+    --color-surface: 255 255 255;
+    --color-surface-raised: 250 250 250;
+    --color-surface-panel: 255 255 255;
+    --color-surface-border: 228 228 231;
+    --color-surface-hover: 244 244 245;
+    --color-text: 24 24 27;
+    --color-text-muted: 63 63 70;
+    --color-text-dim: 91 91 99;
+    --color-overlay: 24 24 27;
+    --shadow-panel: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.12);
+    --shadow-glow: 0 0 0 1px rgba(12,92,171,0.35), 0 8px 24px -8px rgba(12,92,171,0.25);
+    --bg-panel-gradient: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 100%);
+    --bg-app-radial: radial-gradient(1200px 600px at 0% 0%, rgba(12,92,171,0.08), transparent 60%), radial-gradient(900px 500px at 100% 100%, rgba(12,92,171,0.05), transparent 60%);
+    --scrollbar-thumb: #d4d4d8;
+    --scrollbar-thumb-hover: #a1a1aa;
+  }
+
   html, body, #root { height: 100%; }
   body {
     @apply bg-surface text-text font-sans antialiased;
-    background-image: theme('backgroundImage.app-radial');
+    background-image: var(--bg-app-radial);
     background-attachment: fixed;
   }
   *:focus-visible {
-    outline: 2px solid #0C5CAB;
+    outline: 2px solid rgb(var(--color-primary));
     outline-offset: 2px;
     border-radius: 4px;
   }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #26262d; border-radius: 8px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a3a45; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
   .panel {
     @apply bg-surface-panel/80 border border-surface-border rounded-xl shadow-panel backdrop-blur;
-    background-image: theme('backgroundImage.panel-gradient');
+    background-image: var(--bg-panel-gradient);
   }
   .panel-raised {
     @apply bg-surface-raised border border-surface-border rounded-xl shadow-panel;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-3 h-9 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed select-none;
+    @apply inline-flex items-center justify-center gap-2 px-3 h-9 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed select-none;
   }
   .btn-primary { @apply btn bg-primary hover:bg-primary-hover text-white; }
   .btn-secondary { @apply btn bg-surface-raised border border-surface-border hover:bg-surface-hover text-text; }

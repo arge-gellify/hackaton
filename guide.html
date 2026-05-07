@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agile Retro Platform — Project Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-2: #0d0d10;
+    --surface: #111114;
+    --surface-2: #16161a;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --text-dim: #71717a;
+    --primary: #0C5CAB;
+    --primary-2: #1d76d1;
+    --primary-hover: #0a4a8a;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 999px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(12,92,171,0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(29,118,209,0.12), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  code, pre { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+  a { color: var(--primary-2); text-decoration: none; }
+  a:hover { color: #5aa3e8; }
+
+  :focus-visible {
+    outline: 2px solid var(--primary-2);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1320px;
+    margin: 0 auto;
+    gap: 32px;
+    padding: 24px;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+  }
+
+  /* Sidebar */
+  aside.nav {
+    position: sticky; top: 16px;
+    align-self: start;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 4px 12px; margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand .logo {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-2), var(--primary));
+    display: grid; place-items: center; font-weight: 700; font-size: 14px;
+    box-shadow: 0 6px 18px rgba(12,92,171,0.4);
+  }
+  .brand .title { font-weight: 600; font-size: 14px; letter-spacing: 0.2px; }
+  .brand .sub { font-size: 11px; color: var(--text-muted); }
+  nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  nav a.nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 13px;
+    border: 1px solid transparent;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  nav a.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  nav a.nav-link[aria-current="true"] {
+    background: rgba(12,92,171,0.18);
+    color: var(--text);
+    border-color: rgba(29,118,209,0.4);
+  }
+  nav a.nav-link .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
+  nav a.nav-link[aria-current="true"] .dot { background: var(--primary-2); box-shadow: 0 0 0 3px rgba(29,118,209,0.2); }
+  @media (max-width: 900px) {
+    aside.nav { position: static; max-height: none; }
+    nav ul { flex-direction: row; flex-wrap: wrap; }
+  }
+
+  /* Main */
+  main { min-width: 0; display: flex; flex-direction: column; gap: 28px; }
+  section { scroll-margin-top: 24px; }
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  h1 { font-size: 32px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 16px; }
+  p { margin: 0; color: var(--text-muted); }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+  .panel + .panel { margin-top: 0; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 32px;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(420px 200px at 90% 0%, rgba(29,118,209,0.25), transparent 60%),
+      radial-gradient(360px 180px at 0% 100%, rgba(16,185,129,0.12), transparent 60%);
+    pointer-events: none;
+  }
+  .hero > * { position: relative; }
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.03);
+  }
+  .hero h1 { margin-top: 14px; max-width: 760px; }
+  .hero .lede { margin-top: 12px; max-width: 720px; font-size: 15px; }
+  .badges { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    font-size: 12px; padding: 4px 10px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong); background: rgba(255,255,255,0.03);
+    color: var(--text);
+  }
+  .badge.primary { background: rgba(12,92,171,0.2); border-color: rgba(29,118,209,0.5); }
+  .badge.success { background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.4); color: #b9f0d6; }
+  .badge.warning { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.4); color: #fde2a4; }
+  .cta-row { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border-strong);
+    background: rgba(255,255,255,0.04);
+    color: var(--text); cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+  }
+  .btn:hover { background: rgba(255,255,255,0.08); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--primary); border-color: var(--primary-2); }
+  .btn.primary:hover { background: var(--primary-hover); }
+
+  /* Section headers */
+  .section-head {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px;
+  }
+  .section-head .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--text-dim);
+    border: 1px solid var(--border-strong);
+    padding: 2px 8px; border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.03);
+  }
+  .section-head p { margin-left: auto; font-size: 12px; }
+
+  /* Grids */
+  .grid {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; }
+  .card .name { font-weight: 600; margin-top: 4px; font-size: 14px; }
+  .card .desc { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+
+  details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  details summary {
+    cursor: pointer; list-style: none;
+    padding: 12px 16px; font-weight: 500; font-size: 13px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--text-muted); font-family: monospace; }
+  details[open] summary::after { content: "−"; }
+  details .body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  pre.code {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    overflow: auto;
+    font-size: 12px; line-height: 1.6;
+    color: #d4d4d8;
+    margin: 12px 0 0;
+  }
+
+  /* Roles */
+  .roles {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .role {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .role .head { display: flex; align-items: center; gap: 10px; }
+  .role .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .role[data-role="admin"] .swatch { background: var(--danger); }
+  .role[data-role="scrum_master"] .swatch { background: var(--primary-2); }
+  .role[data-role="member"] .swatch { background: var(--success); }
+  .role[data-role="viewer"] .swatch { background: var(--text-dim); }
+  .role h3 { font-size: 14px; }
+  .role p { font-size: 12px; }
+
+  /* Permission matrix */
+  .role-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; align-items: center; }
+  .role-filter .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; margin-right: 4px; }
+  .chip {
+    border: 1px solid var(--border-strong);
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    padding: 6px 12px; border-radius: var(--radius-pill);
+    font-size: 12px; cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .chip:hover { background: rgba(255,255,255,0.07); }
+  .chip[aria-pressed="true"] { background: rgba(12,92,171,0.25); border-color: rgba(29,118,209,0.6); }
+
+  .matrix-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table.matrix { width: 100%; border-collapse: collapse; min-width: 640px; }
+  table.matrix th, table.matrix td {
+    padding: 10px 12px; text-align: left; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.matrix thead th {
+    position: sticky; top: 0;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  table.matrix tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  table.matrix td.role-col { text-align: center; width: 92px; color: var(--text-dim); }
+  table.matrix td.allow { color: var(--success); font-weight: 600; }
+  table.matrix[data-role-active] td.role-col:not([data-col]) { /* noop */ }
+  table.matrix[data-role-active="admin"] th[data-col="admin"],
+  table.matrix[data-role-active="scrum_master"] th[data-col="scrum_master"],
+  table.matrix[data-role-active="member"] th[data-col="member"],
+  table.matrix[data-role-active="viewer"] th[data-col="viewer"] {
+    color: var(--text);
+    background: rgba(12,92,171,0.18);
+  }
+  table.matrix[data-role-active="admin"] td.role-col:not([data-col="admin"]),
+  table.matrix[data-role-active="scrum_master"] td.role-col:not([data-col="scrum_master"]),
+  table.matrix[data-role-active="member"] td.role-col:not([data-col="member"]),
+  table.matrix[data-role-active="viewer"] td.role-col:not([data-col="viewer"]) {
+    opacity: 0.25;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    padding: 4px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+  }
+  .tab {
+    padding: 8px 12px; font-size: 13px; border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    background: transparent; color: var(--text-muted); cursor: pointer;
+  }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab[aria-selected="true"] {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+  .tabpanel { display: none; }
+  .tabpanel[data-active="true"] { display: block; }
+  .tabpanel h3 { margin-bottom: 6px; }
+  .tabpanel ul { margin: 10px 0 0; padding-left: 20px; color: var(--text-muted); }
+  .tabpanel ul li { margin-bottom: 4px; font-size: 13px; }
+  .tabpanel ul li b { color: var(--text); font-weight: 500; }
+  .who { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .who .tag {
+    font-size: 11px; padding: 3px 10px; border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+  }
+  .who .tag.allow { color: #b9f0d6; background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.4); }
+
+  /* Demo checklist */
+  .progress {
+    height: 6px; background: rgba(255,255,255,0.06);
+    border-radius: var(--radius-pill); overflow: hidden; margin-top: 12px;
+  }
+  .progress > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--primary-2), var(--success));
+    transition: width 200ms ease;
+  }
+  .progress-row { display: flex; align-items: center; gap: 12px; }
+  .progress-row .count { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .steps { list-style: none; padding: 0; margin: 16px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .step:hover { border-color: var(--border-strong); }
+  .step input { margin-top: 3px; accent-color: var(--primary-2); width: 16px; height: 16px; cursor: pointer; }
+  .step .num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--text-dim); min-width: 24px;
+  }
+  .step .text { font-size: 13px; color: var(--text); }
+  .step.done .text { color: var(--text-muted); text-decoration: line-through; }
+  .step.done { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.25); }
+
+  footer {
+    margin-top: 12px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="nav" aria-label="Guide navigation">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">R</div>
+      <div>
+        <div class="title">Retro Platform</div>
+        <div class="sub">Project Guide</div>
+      </div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#overview" class="nav-link" aria-current="true"><span class="dot"></span>Overview</a></li>
+        <li><a href="#stack" class="nav-link"><span class="dot"></span>Tech & Architecture</a></li>
+        <li><a href="#roles" class="nav-link"><span class="dot"></span>Roles & Permissions</a></li>
+        <li><a href="#features" class="nav-link"><span class="dot"></span>Feature Walkthrough</a></li>
+        <li><a href="#demo" class="nav-link"><span class="dot"></span>Demo Script</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main>
+    <!-- Hero -->
+    <section id="overview" class="panel hero">
+      <span class="eyebrow">Hackathon · MVP</span>
+      <h1>Agile Retro Platform — Frontend-Only MVP</h1>
+      <p class="lede">A workspace-per-project retrospective tool: role-gated access, structured retro boards with voting, action-item tracking across retros, history timelines, and exportable project archives. Single-page React app, mock data, no backend.</p>
+      <div class="badges">
+        <span class="badge primary">Vite + React + TS</span>
+        <span class="badge">Zustand</span>
+        <span class="badge">shadcn/ui</span>
+        <span class="badge">Tailwind</span>
+        <span class="badge success">Frontend-only</span>
+        <span class="badge warning">Resets on refresh</span>
+      </div>
+      <div class="cta-row">
+        <a class="btn primary" href="#demo">Run the demo script →</a>
+        <a class="btn" href="#roles">Explore roles</a>
+        <a class="btn" href="PRD.md">Read the PRD</a>
+      </div>
+    </section>
+
+    <!-- Tech & Architecture -->
+    <section id="stack" class="panel">
+      <header class="section-head">
+        <span class="num">02</span>
+        <h2>Tech & Architecture</h2>
+        <p>Source: PRD §2 · §5</p>
+      </header>
+      <div class="grid" id="stack-grid"></div>
+
+      <details>
+        <summary>Directory layout (<code>src/</code>)</summary>
+        <div class="body">
+<pre class="code">src/
+  app/
+    routes.tsx              # React Router config
+    App.tsx                 # shell + providers
+  pages/
+    LoginPage.tsx
+    ProjectsPage.tsx
+    project/
+      ProjectShell.tsx      # tabs nav inside a project
+      RetrosTab.tsx
+      RetroBoardPage.tsx
+      HistoryTab.tsx        # timeline
+      ActionItemsTab.tsx
+      ReportsTab.tsx
+      ReportPage.tsx
+      SettingsTab.tsx
+  components/
+    ui/                     # shadcn-generated
+    auth/RoleSwitcher.tsx
+    board/Column.tsx
+    board/Card.tsx
+    board/ActionItemList.tsx
+    board/VoteButton.tsx
+    filters/&lt;feature&gt;Filter.tsx
+  stores/
+    useAppStore.ts          # Zustand root
+    slices/{auth,projects,retros,ui}.ts
+  domain/
+    types.ts
+    permissions.ts          # can(role, action, ctx)
+    templates.ts
+    seed.ts
+  features/
+    export/projectZip.ts
+    export/reportPdf.ts
+  data/seed.json
+  lib/{cn,format}.ts
+  main.tsx</pre>
+        </div>
+      </details>
+
+      <details>
+        <summary>Domain model (TypeScript)</summary>
+        <div class="body">
+<pre class="code">type Role = 'admin' | 'scrum_master' | 'member' | 'viewer';
+
+interface Project {
+  id: ProjectId;
+  name: string;
+  description?: string;
+  createdAt: string;
+  members: { userId: UserId; role: Role }[];
+}
+
+interface Retro {
+  id: RetroId; projectId: ProjectId; title: string;
+  templateId: string; status: 'active' | 'closed';
+  createdAt: string; closedAt?: string;
+  voteBudgetPerUser: number; cards: Card[];
+}
+
+interface Card {
+  id: CardId; retroId: RetroId; columnKey: string;
+  text: string; authorId: UserId;     // tracked, never rendered
+  order: number;
+  votes: { userId: UserId }[];        // multiple per (card,user) = stacked
+  actionItems: ActionItem[];
+}
+
+interface ActionItem {
+  id: ActionItemId; cardId: CardId; title: string;
+  assigneeId?: UserId; dueDate?: string;
+  status: 'open' | 'in_progress' | 'done';
+  createdAt: string;
+}
+
+interface Report {
+  id: ReportId; retroId: RetroId; generatedAt: string;
+  isFinal: boolean; summary: string;  // markdown
+}</pre>
+        </div>
+      </details>
+    </section>
+
+    <!-- Roles & Permissions -->
+    <section id="roles" class="panel">
+      <header class="section-head">
+        <span class="num">03</span>
+        <h2>Roles & Permissions</h2>
+        <p>Source: PRD §3 · §4</p>
+      </header>
+      <div class="roles">
+        <div class="role" data-role="admin">
+          <div class="head"><span class="swatch"></span><h3>Admin</h3></div>
+          <p>Project owner. Manages members, settings, downloads, deletes.</p>
+        </div>
+        <div class="role" data-role="scrum_master">
+          <div class="head"><span class="swatch"></span><h3>Scrum Master</h3></div>
+          <p>Runs the retro. Creates and closes retros, edits report summaries, marks reports final.</p>
+        </div>
+        <div class="role" data-role="member">
+          <div class="head"><span class="swatch"></span><h3>Member</h3></div>
+          <p>Active participant. Adds cards, votes, drags cards, owns/edits own action items.</p>
+        </div>
+        <div class="role" data-role="viewer">
+          <div class="head"><span class="swatch"></span><h3>Viewer</h3></div>
+          <p>Read-only stakeholder. Sees everything but cannot interact.</p>
+        </div>
+      </div>
+
+      <div class="role-filter" role="group" aria-label="Filter permissions by role">
+        <span class="label">Filter</span>
+        <button class="chip" data-role-filter="all" aria-pressed="true">All roles</button>
+        <button class="chip" data-role-filter="admin" aria-pressed="false">Admin</button>
+        <button class="chip" data-role-filter="scrum_master" aria-pressed="false">Scrum Master</button>
+        <button class="chip" data-role-filter="member" aria-pressed="false">Member</button>
+        <button class="chip" data-role-filter="viewer" aria-pressed="false">Viewer</button>
+      </div>
+
+      <div class="matrix-wrap">
+        <table class="matrix" id="permission-matrix">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th data-col="viewer">Viewer</th>
+              <th data-col="member">Member</th>
+              <th data-col="scrum_master">Scrum Master</th>
+              <th data-col="admin">Admin</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body"></tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px; font-size:12px;"><strong style="color:var(--text)">Anonymity note:</strong> cards always display "Anonymous" in the UI. Authorship is tracked internally so Members can edit their own cards.</p>
+    </section>
+
+    <!-- Feature walkthrough -->
+    <section id="features" class="panel">
+      <header class="section-head">
+        <span class="num">04</span>
+        <h2>Feature Walkthrough</h2>
+        <p>Source: PRD §6</p>
+      </header>
+      <div class="tabs" role="tablist" aria-label="Features"></div>
+      <div id="tabpanels"></div>
+    </section>
+
+    <!-- Demo script -->
+    <section id="demo" class="panel">
+      <header class="section-head">
+        <span class="num">05</span>
+        <h2>Demo Script — Happy Path</h2>
+        <p>Source: PRD §9</p>
+      </header>
+      <p>Tick steps as you go. Progress is saved in your browser.</p>
+      <div class="progress-row" style="margin-top:8px;">
+        <div class="progress" style="flex:1;"><div id="progress-bar"></div></div>
+        <span class="count" id="progress-count">0 / 10</span>
+        <button class="btn" id="reset-demo">Reset</button>
+      </div>
+      <ol class="steps" id="demo-steps"></ol>
+    </section>
+
+    <footer>
+      <span>Agile Retro Platform · Project Guide</span>
+      <span><a href="PRD.md">PRD</a> · <a href="README.md">README</a></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // ---------- Data ----------
+  const STACK = [
+    ['Build / Dev', 'Vite + React (TypeScript)'],
+    ['State', 'Zustand (sliced store)'],
+    ['UI', 'shadcn/ui'],
+    ['Styling', 'Tailwind CSS'],
+    ['Routing', 'React Router v6'],
+    ['Drag & Drop', '@dnd-kit/core + sortable'],
+    ['PDF', 'jspdf'],
+    ['ZIP', 'jszip + file-saver'],
+    ['Forms', 'react-hook-form + zod'],
+    ['Dates', 'shadcn calendar + date-fns'],
+    ['Icons', 'lucide-react'],
+  ];
+
+  const PERMISSIONS = [
+    ['View project / retro / report / history', [1,1,1,1]],
+    ['Add card to active retro', [0,1,1,1]],
+    ['Vote on cards', [0,1,1,1]],
+    ['Drag/reorder cards (active retro)', [0,1,1,1]],
+    ['Add action item to a card', [0,1,1,1]],
+    ['Edit own card / own action item', [0,1,1,1]],
+    ['Edit / delete ANY card or action item', [0,0,1,1]],
+    ['Create retro', [0,0,1,1]],
+    ['Close retro', [0,0,1,1]],
+    ['Edit report summary', [0,0,1,1]],
+    ['Mark report "Final"', [0,0,1,1]],
+    ['Create new project (becomes its Admin)', [1,1,1,1]],
+    ['Add / remove members', [0,0,0,1]],
+    ['Change a member’s role', [0,0,0,1]],
+    ['Delete project', [0,0,0,1]],
+    ['Download project ZIP', [0,0,0,1]],
+  ];
+  // Order: Viewer, Member, Scrum Master, Admin
+  const ROLE_KEYS = ['viewer','member','scrum_master','admin'];
+
+  const FEATURES = [
+    {
+      id: 'projects',
+      label: 'Projects',
+      blurb: 'Workspace home — list of projects you belong to, with your role on each. Anyone can create a new project (and becomes its Admin).',
+      stories: [
+        '<b>US-PRJ-1</b> See projects you’re a member of, with role badges.',
+        '<b>US-PRJ-2</b> Filter by name (text) and by role.',
+        '<b>US-PRJ-3</b> Create a project — you become its Admin and only member.',
+      ],
+      who: [['Viewer','allow'],['Member','allow'],['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'retros',
+      label: 'Retros',
+      blurb: 'Per-project list of retrospectives with status, template, and counts. Scrum Masters/Admins create new retros from a template.',
+      stories: [
+        '<b>US-RET-1</b> List retros with status pill, template, date, vote/card counts.',
+        '<b>US-RET-2</b> Filter by status, template, date range.',
+        '<b>US-RET-3</b> Create retro: title, template, vote budget (default 3).',
+      ],
+      who: [['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'board',
+      label: 'Board',
+      blurb: 'The retro board: columns from a template, anonymous cards, drag-and-drop, dot-stacked voting, and per-card action items. Closing the retro freezes it and generates a report.',
+      stories: [
+        '<b>US-BRD-2</b> Add cards inline at the top of each column.',
+        '<b>US-BRD-4</b> Drag-and-drop across columns and reorder within (dnd-kit).',
+        '<b>US-BRD-5</b> Voting with a per-user budget; stack votes on the same card.',
+        '<b>US-BRD-7</b> Action items per card with assignee, due date, status.',
+        '<b>US-BRD-8</b> Close retro → read-only board + auto-generated report.',
+      ],
+      who: [['Member','allow'],['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'history',
+      label: 'History',
+      blurb: 'Vertical timeline of every retro in a project. Click a marker to open that retro in read-only mode (with link to its report if closed).',
+      stories: [
+        '<b>US-HIS-1</b> Chronological markers with date, title, status, top metric.',
+        '<b>US-HIS-2</b> Open past retro in read-only board view.',
+        '<b>US-HIS-3</b> Filter by date range and status.',
+      ],
+      who: [['Viewer','allow'],['Member','allow'],['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'action-items',
+      label: 'Action Items',
+      blurb: 'Cross-retro view of every action item in the project. Filter, sort, and edit status inline; click through to the source retro.',
+      stories: [
+        '<b>US-AI-1</b> See every action item across all retros.',
+        '<b>US-AI-2</b> Filter by assignee, status, source retro.',
+        '<b>US-AI-3</b> Sort by due date / status.',
+        '<b>US-AI-4</b> Inline status edit (own as Member, any as Scrum Master+).',
+      ],
+      who: [['Member','allow'],['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      blurb: 'Auto-generated on retro close: top-voted cards per column, vote totals, action-item rollup. Scrum Master/Admin edits the markdown summary and marks the report Final.',
+      stories: [
+        '<b>US-REP-1</b> Report computed from retro state (top cards, rollups).',
+        '<b>US-REP-2</b> Edit free-text Summary (markdown).',
+        '<b>US-REP-3</b> Mark report Final (locks summary).',
+        '<b>US-REP-5</b> Download a single report as PDF (jsPDF).',
+      ],
+      who: [['Scrum Master','allow'],['Admin','allow']],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      blurb: 'Admin-only project settings: members table, add/remove, change roles, delete project.',
+      stories: [
+        '<b>US-SET-1</b> Members table with Remove action.',
+        '<b>US-SET-2</b> Add member from global users; assign a role.',
+        '<b>US-SET-3</b> Inline role-change dropdown.',
+        '<b>US-SET-4</b> Delete project (with confirmation).',
+      ],
+      who: [['Admin','allow']],
+    },
+    {
+      id: 'download',
+      label: 'Project Download',
+      blurb: 'Admin-only one-click ZIP archive: full project JSON, one PDF per closed retro report, and a README export note.',
+      stories: [
+        '<b>US-DL-1</b> "Download Project" button visible to Admin.',
+        '<b>US-DL-2</b> Produces <code>&lt;slug&gt;-&lt;YYYY-MM-DD&gt;.zip</code> with project.json, reports/*.pdf, README.md.',
+      ],
+      who: [['Admin','allow']],
+    },
+  ];
+
+  const DEMO_STEPS = [
+    'Land on Login → click "Bob (Scrum Master)" → land on Projects.',
+    'Filter Projects by name → open "Phoenix Engineering."',
+    'Open the Active retro. Add a card. Vote on two cards. Drag a card. Add an action item with assignee + due date.',
+    'Click "Close Retro" → board becomes read-only, toast "Report generated."',
+    'Reports tab → open the new report → edit Summary → mark Final → Download PDF.',
+    'History tab → see the timeline with the just-closed retro at the top.',
+    'Action Items tab → filter by Carol → see assigned items across retros.',
+    'Switch user via floating Role Switcher → become Alice (Admin).',
+    'Settings tab → add Dan as Scrum Master in another existing role → demonstrate role change.',
+    '"Download Project" → ZIP downloads → unzip → show JSON + PDF + README.',
+  ];
+
+  // ---------- Renderers ----------
+  function renderStack() {
+    const grid = document.getElementById('stack-grid');
+    grid.innerHTML = STACK.map(([label, name]) => `
+      <div class="card">
+        <div class="label">${label}</div>
+        <div class="name">${name}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderMatrix() {
+    const tbody = document.getElementById('matrix-body');
+    tbody.innerHTML = PERMISSIONS.map(([action, perms]) => `
+      <tr>
+        <td>${action}</td>
+        ${ROLE_KEYS.map((k, i) => `<td class="role-col ${perms[i] ? 'allow' : ''}" data-col="${k}">${perms[i] ? '✓' : '—'}</td>`).join('')}
+      </tr>
+    `).join('');
+  }
+
+  function setupRoleFilter() {
+    const chips = document.querySelectorAll('[data-role-filter]');
+    const matrix = document.getElementById('permission-matrix');
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const role = chip.dataset.roleFilter;
+        chips.forEach(c => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
+        if (role === 'all') matrix.removeAttribute('data-role-active');
+        else matrix.setAttribute('data-role-active', role);
+      });
+    });
+  }
+
+  function renderTabs() {
+    const tablist = document.querySelector('.tabs');
+    const panels = document.getElementById('tabpanels');
+    tablist.innerHTML = FEATURES.map((f, i) => `
+      <button role="tab" class="tab" id="tab-${f.id}"
+              aria-controls="panel-${f.id}"
+              aria-selected="${i === 0 ? 'true' : 'false'}"
+              tabindex="${i === 0 ? '0' : '-1'}">${f.label}</button>
+    `).join('');
+    panels.innerHTML = FEATURES.map((f, i) => `
+      <div role="tabpanel" class="tabpanel" id="panel-${f.id}"
+           aria-labelledby="tab-${f.id}" data-active="${i === 0 ? 'true' : 'false'}">
+        <h3>${f.label}</h3>
+        <p>${f.blurb}</p>
+        <ul>${f.stories.map(s => `<li>${s}</li>`).join('')}</ul>
+        <div class="who">
+          <span class="tag" style="border-color:transparent;background:transparent;padding-left:0;">Who can use:</span>
+          ${f.who.map(([label, kind]) => `<span class="tag ${kind}">${label}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    const tabs = [...tablist.querySelectorAll('.tab')];
+    function activate(idx) {
+      tabs.forEach((t, i) => {
+        const sel = i === idx;
+        t.setAttribute('aria-selected', sel ? 'true' : 'false');
+        t.setAttribute('tabindex', sel ? '0' : '-1');
+        document.getElementById('panel-' + FEATURES[i].id).setAttribute('data-active', sel ? 'true' : 'false');
+      });
+      tabs[idx].focus();
+    }
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => activate(i));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); activate((i + 1) % tabs.length); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); activate((i - 1 + tabs.length) % tabs.length); }
+        if (e.key === 'Home')       { e.preventDefault(); activate(0); }
+        if (e.key === 'End')        { e.preventDefault(); activate(tabs.length - 1); }
+      });
+    });
+  }
+
+  // ---------- Demo checklist ----------
+  const STORE_KEY = 'guide.demo.steps';
+  function loadDemoState() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch { return []; }
+  }
+  function saveDemoState(state) { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  function renderDemo() {
+    const list = document.getElementById('demo-steps');
+    const state = loadDemoState();
+    list.innerHTML = DEMO_STEPS.map((text, i) => `
+      <li class="step ${state[i] ? 'done' : ''}" data-idx="${i}">
+        <input type="checkbox" ${state[i] ? 'checked' : ''} aria-label="Step ${i + 1}" />
+        <span class="num">${String(i + 1).padStart(2, '0')}</span>
+        <span class="text">${text}</span>
+      </li>
+    `).join('');
+    updateProgress();
+    list.querySelectorAll('.step').forEach(li => {
+      const idx = Number(li.dataset.idx);
+      const cb = li.querySelector('input');
+      function toggle() {
+        const s = loadDemoState();
+        s[idx] = !s[idx];
+        saveDemoState(s);
+        li.classList.toggle('done', !!s[idx]);
+        cb.checked = !!s[idx];
+        updateProgress();
+      }
+      li.addEventListener('click', (e) => { if (e.target !== cb) toggle(); });
+      cb.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    });
+  }
+  function updateProgress() {
+    const state = loadDemoState();
+    const done = DEMO_STEPS.reduce((acc, _, i) => acc + (state[i] ? 1 : 0), 0);
+    document.getElementById('progress-bar').style.width = (done / DEMO_STEPS.length * 100) + '%';
+    document.getElementById('progress-count').textContent = `${done} / ${DEMO_STEPS.length}`;
+  }
+  document.getElementById('reset-demo').addEventListener('click', () => {
+    saveDemoState([]); renderDemo();
+  });
+
+  // ---------- Sidebar active link ----------
+  function setupSidebarObserver() {
+    const links = [...document.querySelectorAll('.nav-link')];
+    const sections = links.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+    const byId = new Map(sections.map((s, i) => [s.id, links[i]]));
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.removeAttribute('aria-current'));
+          byId.get(e.target.id)?.setAttribute('aria-current', 'true');
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+    sections.forEach(s => obs.observe(s));
+  }
+
+  // ---------- Init ----------
+  renderStack();
+  renderMatrix();
+  setupRoleFilter();
+  renderTabs();
+  renderDemo();
+  setupSidebarObserver();
+</script>
+</body>
+</html>
